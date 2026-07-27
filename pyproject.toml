@@ -1,0 +1,112 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pyhikrobot"
+dynamic = ["version"]
+description = "Thin, zero-copy Python bindings for Hikrobot machine-vision cameras (MVS SDK)."
+readme = "README.md"
+requires-python = ">=3.9"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "Stanislav Shalimov" }]
+keywords = ["hikrobot", "mvs", "machine-vision", "camera", "genicam", "gige", "numpy"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Graphics :: Capture",
+    "Topic :: Scientific/Engineering :: Image Processing",
+    "Typing :: Typed",
+]
+dependencies = ["numpy>=1.20"]
+
+[project.optional-dependencies]
+cuda = ["cupy-cuda12x>=13"]
+dev = ["pytest>=8", "pytest-cov", "ruff", "mypy"]
+
+[project.urls]
+Homepage = "https://github.com/Shalimov04/pyhikrobot"
+Source = "https://github.com/Shalimov04/pyhikrobot"
+Changelog = "https://github.com/Shalimov04/pyhikrobot/blob/main/CHANGELOG.md"
+
+[tool.hatch.version]
+path = "src/hikrobot/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/hikrobot"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "examples", "CHANGELOG.md", "README.md", "LICENSE", "NOTICE"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle
+    "W",
+    "F",    # pyflakes
+    "I",    # isort
+    "UP",   # pyupgrade
+    "B",    # bugbear
+    "C4",   # comprehensions
+    "SIM",  # simplify
+    "RUF",
+    "D",    # pydocstyle - public API must be documented
+]
+ignore = [
+    "D105",  # magic method docstrings
+    "D107",  # __init__ docstring (documented on the class)
+    "D203",
+    "D213",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D"]
+"examples/**" = ["D"]
+# ctypes requires _fields_ to be a plain mutable class attribute, not a ClassVar.
+"src/hikrobot/_ctypes_defs.py" = ["RUF012"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+# mypy >= 2.0 refuses to target 3.9; the 3.9 floor is enforced by the CI test matrix and
+# by ruff's target-version instead.
+python_version = "3.10"
+strict = true
+files = ["src", "tests"]
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+# ctypes transcriptions are structurally untypeable in strict mode.
+module = "hikrobot._ctypes_defs"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = ["cupy.*", "cupyx.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --strict-config"
+markers = [
+    "hardware: requires a real Hikrobot camera and an installed MVS SDK (needs --hardware)",
+]
+
+[tool.coverage.run]
+source = ["hikrobot"]
+branch = true
