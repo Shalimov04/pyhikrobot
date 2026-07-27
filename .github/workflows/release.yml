@@ -1,0 +1,59 @@
+name: Release
+
+# Publishes to PyPI through Trusted Publishing: PyPI accepts the upload because it can
+# verify, over OIDC, that it came from this workflow in this repository. There is no API
+# token anywhere - not in the repo, not in GitHub secrets, not on a developer's machine.
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Check the tag matches the package version
+        # A mismatch here is unrecoverable once uploaded: PyPI never lets a version be
+        # replaced. Cheaper to fail the build.
+        run: |
+          python -m pip install --upgrade pip build
+          version=$(grep -oP '(?<=^__version__ = ")[^"]+' src/hikrobot/__init__.py)
+          tag="${GITHUB_REF_NAME#v}"
+          echo "package=$version tag=$tag"
+          test "$version" = "$tag"
+
+      - run: python -m build
+
+      - name: Install the wheel and import it
+        run: |
+          python -m venv /tmp/check
+          /tmp/check/bin/python -m pip install --quiet dist/*.whl
+          cd /tmp
+          /tmp/check/bin/python -c "
+          import hikrobot, hikrobot._loader as loader
+          assert 'site-packages' in hikrobot.__file__, hikrobot.__file__
+          assert loader._library is None, 'the SDK was loaded at import time'
+          print(hikrobot.__version__)
+          "
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

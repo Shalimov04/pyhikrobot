@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-07-27
+
+First release. Enumeration, open/close, the GenICam node map, streaming with enforced buffer
+lifetime, and GigE transport tuning — all exercised against an MV-CS023-10GM. Action commands
+and the CUDA layer are not implemented yet, and the public API may still change.
+
 ### Added
 
 - README with the public API, the buffer-lifetime rules and the GigE transport notes. Every

@@ -11,7 +11,7 @@ Every failure derives from :class:`HikrobotError`. A status returned by the SDK 
 and are reachable through :attr:`StatusError.status` and :attr:`StatusError.name`.
 """
 
-__version__ = "0.0.1.dev0"
+__version__ = "0.1.0"
 
 __all__ = [
     "AccessDeniedError",

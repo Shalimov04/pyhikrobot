@@ -23,14 +23,12 @@ get it from the vendor under their terms.
 
 ## Install
 
-Not published to PyPI yet — install from the repository:
-
 ```bash
-pip install git+https://github.com/Shalimov04/pyhikrobot
-pip install "pyhikrobot[cuda] @ git+https://github.com/Shalimov04/pyhikrobot"
+pip install pyhikrobot
 ```
 
-The `cuda` extra pulls in CuPy for the device-side layer, which is not written yet.
+The `cuda` extra (`pip install "pyhikrobot[cuda]"`) pulls in CuPy for the device-side
+layer, which is not written yet.
 
 The SDK is found through `MVCAM_SDK_PATH`, falling back to `/opt/MVS` on Linux and the
 installer's `Common Files\MVS\Runtime` on Windows. Nothing is loaded at import time, so
